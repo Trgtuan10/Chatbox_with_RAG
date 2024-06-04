@@ -1,0 +1,6 @@
+accelerate
+bitsandbytes 
+sentence_transformers 
+faiss-cpu 
+langchain 
+langchain_community
