@@ -24,16 +24,8 @@ class SentenceTransformerEmbeddings(Embeddings):
     def encode(self, text):
         return self.model.encode(text, normalize_embeddings=True)
 
-def search_top_k(db, query, k=3):
-    # Generate query vector
-    query_embedding = embedding_model.embed_query(query)
 
-    # Search for top k candidates
-    results = db.similarity_search_by_vector(query_embedding, k)
-
-    return results
-
-def create_db_from_files(data_path: str, vector_db_path: str):
+def create_db_from_files(data_path: str, vector_db_path: str, embedding_model: SentenceTransformerEmbeddings):
     # Check if the directory exists
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"The directory {data_path} does not exist.")
@@ -51,6 +43,34 @@ def create_db_from_files(data_path: str, vector_db_path: str):
 
     db = FAISS.from_documents(chunks, embedding = embedding_model)
     db.save_local(vector_db_path)
+    
+#search top k from db by query which embedd from ebmedding model
+def search_top_k(db, embedding_model, query, k=3):
+    # Generate query vector
+    query_embedding = embedding_model.embed_query(query)
+
+    # Search for top k candidates
+    results = db.similarity_search_by_vector(query_embedding, k)
+
+    return results
+
+def load_llm__model(model_name: str):
+    lora_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        # load_in_8bit=True,
+    )
+
+    # model_name = 'Viet-Mistral/Vistral-7B-Chat'
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        quantization_config=lora_config,
+    #     torch_dtype=torch.bfloat16, # change to torch.float16 if you're using V100
+        device_map="auto",
+        use_cache=True,
+    )
+    return tokenizer, model
+    
 
 if __name__ == "__main__":
     embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
