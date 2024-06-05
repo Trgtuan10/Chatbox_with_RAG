@@ -44,7 +44,6 @@ def main():
             break
 
         conversation.append({"role": "user", "content": human })
-        input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt").to(model.device)
 
         # Find appropreate context
         context = ""
@@ -55,6 +54,7 @@ def main():
             conversation = [{"role": "system", "content": f'Sử dụng thông tin sau đây để trả lời câu hỏi. Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời\n {context}'}]
             conversation.append({"role": "user", "content": human })
 
+        input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt").to(model.device)
         out_ids = model.generate(
             input_ids=input_ids,
             max_new_tokens=768,
