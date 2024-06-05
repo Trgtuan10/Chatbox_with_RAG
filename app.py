@@ -72,14 +72,14 @@ def main():
     
     # if user_input:
     #     conversation.append({"role": "user", "content": user_input})
-    #     input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt").to(model.device)
-        
+    
     #     context = ""
     #     if user_input[-1] == '?':
     #         context = '\n'.join(x.page_content for x in search_top_k(db, embedding_model, user_input, 3))
     #         conversation = [{"role": "system", "content": f'Sử dụng thông tin sau đây để trả lời câu hỏi. Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời\n {context}'}]
     #         conversation.append({"role": "user", "content": user_input})
-        
+
+    #     input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt").to(model.device)
     #     out_ids = model.generate(
     #         input_ids=input_ids,
     #         max_new_tokens=768,
