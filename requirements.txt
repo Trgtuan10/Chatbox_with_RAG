@@ -5,3 +5,4 @@ faiss-cpu
 langchain 
 langchain_community
 streamlit
+huggingface-hub
