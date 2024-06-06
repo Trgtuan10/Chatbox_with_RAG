@@ -11,14 +11,14 @@ from streamlit_chatbox import *
 embedding_model = None
 tokenizer, model = None, None
 
-def list_of_folders(folder_base: str):
+def list_folders(folder_base: str):
     return [folder for folder in os.listdir(folder_base) 
                    if os.path.isdir(os.path.join(folder_base, folder)) 
                    and not folder.endswith("_vector_db")]
 
 def main(): 
     # config sidebar
-    list_of_folders = list_of_folders("database")
+    list_of_folders = list_folders("database")
 
     with st.sidebar:
         st.info("**Upload your documents... ↓**", icon="👋🏾")
@@ -40,18 +40,21 @@ def main():
                     file_path = os.path.join(data_path, file.name)
                     with open(file_path, "wb") as f:
                         f.write(file.getvalue())
+                create_db_from_files(data_path, vector_db_path, embedding_model)
                 
                 # Update the list of folders after creating a new folder
-                list_of_folders = list_of_folders("database")
+                list_of_folders = list_folders("database")
 
         st.divider()
         # Create a selectbox with the list of folders
+        list_of_folders.insert(0, "-")
         selected_folder = st.selectbox("Select a folder", list_of_folders, index=0)
     
     #load vector db
-    vector_db_path = f"database/{selected_folder}_vector_db"
-    db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
-    
+    if selected_folder != "-":
+        vector_db_path = f"database/{selected_folder}_vector_db"
+        # db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        
     #chatbox
     chat_box = ChatBox()
     chat_box.use_chat_name("chat1")
