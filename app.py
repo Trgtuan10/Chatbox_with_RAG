@@ -53,7 +53,7 @@ def main():
     #load vector db
     if selected_folder != "-":
         vector_db_path = f"database/{selected_folder}_vector_db"
-        # db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
         
     #chatbox
     chat_box = ChatBox()
@@ -64,9 +64,7 @@ def main():
     system_prompt = "Tôi là một trợ lí Tiếng Việt nhiệt tình và trung thực. Tôi luôn trả lời một cách hữu ích nhất có thể, đồng thời giữ an toàn.\n"
     conversation = [{"role": "system", "content": system_prompt}]
     
-    user_input = st.text_input("You: ", key="input", placeholder='input your question here')
-    
-    if user_input:
+    if user_input := st.chat_input('input your question here'):
         chat_box.user_say(user_input)
         conversation.append({"role": "user", "content": user_input})
     
@@ -87,11 +85,10 @@ def main():
                          expanded=True, title="answer"),
             ]
         )
-        for x, docs in assistant_response:
+        for x in assistant_response:
             text += x
             chat_box.update_msg(text, element_index=0, streaming=True)
         
-        conversation.append({"role": "assistant", "content": assistant_response})
 
 if __name__ == "__main__":
     login(token="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")
