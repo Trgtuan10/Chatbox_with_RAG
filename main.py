@@ -3,7 +3,7 @@ import torch
 from huggingface_hub import login
 from langchain_community.vectorstores import FAISS
 
-from utils import SentenceTransformerEmbeddings, create_db_from_files, search_top_k, load_llm__model
+from vector_database import SentenceTransformerEmbeddings, create_db_from_files, search_top_k, load_llm__model
 
 def main():
     login(token="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")
@@ -49,7 +49,7 @@ def main():
         context = ""
         if human[-1] == '?':
             context = '\n'.join(x.page_content for x in search_top_k(db, embedding_model, human, 3))
-            print(context)
+            # print(context)
 
             conversation = [{"role": "system", "content": f'Sử dụng thông tin sau đây để trả lời câu hỏi. Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời\n {context}'}]
             conversation.append({"role": "user", "content": human })

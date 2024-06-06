@@ -54,22 +54,6 @@ def search_top_k(db, embedding_model, query, k=3):
 
     return results
 
-def load_llm__model(model_name: str):
-    lora_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        # load_in_8bit=True,
-    )
-
-    # model_name = 'Viet-Mistral/Vistral-7B-Chat'
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=lora_config,
-    #     torch_dtype=torch.bfloat16, # change to torch.float16 if you're using V100
-        device_map="auto",
-        use_cache=True,
-    )
-    return tokenizer, model
     
 
 if __name__ == "__main__":
