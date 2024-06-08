@@ -48,9 +48,12 @@ def gemini():
     return convo
 
 def gemini_answering(model, prompt, context):
-    query = f"Để trả lời câu hỏi {prompt}, hãy dùng thông tin sau: {context} . Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời.\n "
-    # print(query)
-    return model.send_message(query).text
+    if context == "":
+        res = model.send_message(prompt).text
+    else: 
+        query = f"Để trả lời câu hỏi {prompt}, hãy dùng thông tin sau: {context} . Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời.\n "
+        res =  model.send_message(query).text
+    return res
 
 if __name__ == "__main__":
     model = gemini()

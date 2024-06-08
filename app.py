@@ -28,22 +28,29 @@ def main():
 
         if submitted and uploaded_files is not None and folder_name:
             if folder_name in list_of_folders:
-                st.warning("A folder with the same name already exists. Please choose a different name.")
+                dir_path = f"database/{folder_name}"
+                #copunt number folder in dir_path
+                subfolder_count = len([name for name in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, name))])
+                data_path = f"database/{folder_name}/{subfolder_count}_fol"
+                vector_db_path = f"database/{folder_name}__vector_db/{subfolder_count}_fol"
             else:
-                data_path = f"database/{folder_name}"
-                vector_db_path = f"database/{folder_name}_vector_db"
-                # Create the database folder if it doesn't exist
-                os.makedirs(data_path, exist_ok=True)
+                subfolder_name = "0_fol"
+                data_path = f"database/{folder_name}/{subfolder_name}"
+                vector_db_path = f"database/{folder_name}_vector_db/{subfolder_name}"
                 
-                # Save the uploaded files to the database folder
-                for file in uploaded_files:
-                    file_path = os.path.join(data_path, file.name)
-                    with open(file_path, "wb") as f:
-                        f.write(file.getvalue())
-                create_db_from_files(data_path, vector_db_path, embedding_model)
-                
-                # Update the list of folders after creating a new folder
-                list_of_folders = list_folders("database")
+            # Create the database folder if it doesn't exist
+            os.makedirs(data_path, exist_ok=True)
+            os.makedirs(vector_db_path, exist_ok=True)
+            
+            # Save the uploaded files to the database folder
+            for file in uploaded_files:
+                file_path = os.path.join(data_path, file.name)
+                with open(file_path, "wb") as f:
+                    f.write(file.getvalue())
+            # create_db_from_files(data_path, vector_db_path, embedding_model)
+            
+            # Update the list of folders after creating a new folder
+            list_of_folders = list_folders("database")
 
         st.divider()
         # Create a selectbox with the list of folders
@@ -53,7 +60,7 @@ def main():
     #load vector db
     if selected_folder != "-":
         vector_db_path = f"database/{selected_folder}_vector_db"
-        db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        # db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
         
     #chatbox
     chat_box = ChatBox()
@@ -61,12 +68,10 @@ def main():
     chat_box.init_session()
     chat_box.output_messages()
     
-
-    
     if user_input := st.chat_input('input your question here'):
         chat_box.user_say(user_input)
         # conversation.append({"role": "user", "content": user_input})
-    
+        time.sleep(1)
         context = ""
         if user_input[-1] == '?':
             context = '\n'.join(x.page_content for x in search_top_k(db, embedding_model, user_input, 3))

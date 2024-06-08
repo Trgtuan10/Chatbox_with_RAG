@@ -44,16 +44,23 @@ def create_db_from_files(data_path: str, vector_db_path: str, embedding_model: S
     db = FAISS.from_documents(chunks, embedding = embedding_model)
     db.save_local(vector_db_path)
     
-#search top k from db by query which embedd from ebmedding model
-def search_top_k(db, embedding_model, query, k=3):
+
+def search_top_k(folder, embedding_model, query, k=3):
     # Generate query vector
-    query_embedding = embedding_model.embed_query(query)
-
-    # Search for top k candidates
-    results = db.similarity_search_by_vector(query_embedding, k)
-
-    return results
-
+    query_embedding = embedding_model.encode(query)
+    all_results = []
+    
+    folder_db = f"database/{folder}_vector_db"
+    for dir in os.listdir(folder_db):
+        vector_db_path = f"database/{folder_db}/{dir}_vector_db"
+        db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        # Search for top k candidates
+        results = db.similarity_search_by_vector(query_embedding, k)
+        all_results.extend(results)
+        
+    all_results.sort(key=lambda x: x.score, reverse=True)
+    
+    return all_results[:k]
     
 
 if __name__ == "__main__":
