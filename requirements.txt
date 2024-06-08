@@ -7,3 +7,4 @@ langchain_community
 streamlit
 huggingface-hub
 streamlit_chatbox
+google-generativeai
