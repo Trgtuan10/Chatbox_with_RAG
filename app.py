@@ -4,12 +4,12 @@ import time
 from huggingface_hub import login
 from langchain_community.vectorstores import FAISS
 from vector_database import SentenceTransformerEmbeddings, create_db_from_files, search_top_k
-from llm import load_llm__model, llm_answering
+# from llm import load_llm__model, llm_answering
+from gemini import gemini, gemini_answering
 import streamlit as st
 from streamlit_chatbox import *
 
 embedding_model = None
-tokenizer, model = None, None
 
 def list_folders(folder_base: str):
     return [folder for folder in os.listdir(folder_base) 
@@ -61,40 +61,41 @@ def main():
     chat_box.init_session()
     chat_box.output_messages()
     
-    system_prompt = "Tôi là một trợ lí Tiếng Việt nhiệt tình và trung thực. Tôi luôn trả lời một cách hữu ích nhất có thể, đồng thời giữ an toàn.\n"
-    conversation = [{"role": "system", "content": system_prompt}]
+
     
     if user_input := st.chat_input('input your question here'):
         chat_box.user_say(user_input)
-        conversation.append({"role": "user", "content": user_input})
+        # conversation.append({"role": "user", "content": user_input})
     
         context = ""
         if user_input[-1] == '?':
             context = '\n'.join(x.page_content for x in search_top_k(db, embedding_model, user_input, 3))
-            conversation = [{"role": "system", "content": f'Sử dụng thông tin sau đây để trả lời câu hỏi. Nếu bạn không biết câu trả lời, hãy nói không biết, đừng cố tạo ra câu trả lời\n {context}'}]
-            conversation.append({"role": "user", "content": user_input})
 
         #answering
-        assistant_response = llm_answering(model, tokenizer, user_input, conversation)
+        # assistant_response = llm_answering(model, tokenizer, user_input, conversation)
+        assistant_response = gemini_answering(model, user_input, context)
     
-        time.sleep(1)
-        text = ""
         elements = chat_box.ai_say(
             [
+                # you can use string for Markdown output if no other parameters provided
                 Markdown("thinking", in_expander=False,
-                         expanded=True, title="answer"),
+                            expanded=True, title="answer"),
             ]
         )
+        time.sleep(1)
+        text = ""
         for x in assistant_response:
             text += x
             chat_box.update_msg(text, element_index=0, streaming=True)
+            time.sleep(0.05)
         
 
 if __name__ == "__main__":
-    login(token="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")
+    # login(token="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")
     # Load model
-    embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
-    tokenizer, model = load_llm__model("Viet-Mistral/Vistral-7B-Chat")
+    # embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
+    # tokenizer, model = load_llm__model("Viet-Mistral/Vistral-7B-Chat")
+    model =  gemini()
     
     st.title("Chatbox with RAG")
     st.write("Xin chào, tôi là trợ lý chatbot của bạn. Tôi có thể giúp gì cho bạn không?")
