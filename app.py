@@ -47,7 +47,7 @@ def main():
                 file_path = os.path.join(data_path, file.name)
                 with open(file_path, "wb") as f:
                     f.write(file.getvalue())
-            # create_db_from_files(data_path, vector_db_path, embedding_model)
+            create_db_from_files(data_path, vector_db_path, embedding_model)
             
             # Update the list of folders after creating a new folder
             list_of_folders = list_folders("database")
@@ -60,7 +60,7 @@ def main():
     #load vector db
     if selected_folder != "-":
         vector_db_path = f"database/{selected_folder}_vector_db"
-        # db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
         
     #chatbox
     chat_box = ChatBox()
@@ -98,7 +98,7 @@ def main():
 if __name__ == "__main__":
     # login(token="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")
     # Load model
-    # embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
+    embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
     # tokenizer, model = load_llm__model("Viet-Mistral/Vistral-7B-Chat")
     model =  gemini()
     
