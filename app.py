@@ -3,11 +3,12 @@ import torch
 import time
 from huggingface_hub import login
 from langchain_community.vectorstores import FAISS
-from vector_database import SentenceTransformerEmbeddings, create_db_from_files, search_top_k
+from vector_database import SentenceTransformerEmbeddings, create_db_from_files, search_top_k, make_dbs
 # from llm import load_llm__model, llm_answering
 from gemini import gemini, gemini_answering
 import streamlit as st
 from streamlit_chatbox import *
+
 
 embedding_model = None
 
@@ -32,7 +33,7 @@ def main():
                 #copunt number folder in dir_path
                 subfolder_count = len([name for name in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, name))])
                 data_path = f"database/{folder_name}/{subfolder_count}_fol"
-                vector_db_path = f"database/{folder_name}__vector_db/{subfolder_count}_fol"
+                vector_db_path = f"database/{folder_name}_vector_db/{subfolder_count}_fol"
             else:
                 subfolder_name = "0_fol"
                 data_path = f"database/{folder_name}/{subfolder_name}"
@@ -59,8 +60,8 @@ def main():
     
     #load vector db
     if selected_folder != "-":
-        vector_db_path = f"database/{selected_folder}_vector_db"
-        db = FAISS.load_local(vector_db_path, embeddings=embedding_model, allow_dangerous_deserialization=True)
+        folder_path = f"database/{selected_folder}_vector_db"
+        dbs = make_dbs(folder_path, embedding_model)
         
     #chatbox
     chat_box = ChatBox()
@@ -74,7 +75,7 @@ def main():
         time.sleep(1)
         context = ""
         if user_input[-1] == '?':
-            context = '\n'.join(x.page_content for x in search_top_k(db, embedding_model, user_input, 3))
+            context = '\n'.join(x.page_content for x in search_top_k(dbs, embedding_model, user_input, 3))
 
         #answering
         # assistant_response = llm_answering(model, tokenizer, user_input, conversation)
@@ -94,14 +95,10 @@ def main():
             chat_box.update_msg(text, element_index=0, streaming=True)
             time.sleep(0.05)
         
+embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
+model =  gemini()
+st.title("Chatbox with RAG")
+st.write("Xin chào, tôi là trợ lý chatbot của bạn. Tôi có thể giúp gì cho bạn không?")
 
 if __name__ == "__main__":
-    # login(token="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")
-    # Load model
-    embedding_model = SentenceTransformerEmbeddings("BAAI/bge-m3")
-    # tokenizer, model = load_llm__model("Viet-Mistral/Vistral-7B-Chat")
-    model =  gemini()
-    
-    st.title("Chatbox with RAG")
-    st.write("Xin chào, tôi là trợ lý chatbot của bạn. Tôi có thể giúp gì cho bạn không?")
     main()
